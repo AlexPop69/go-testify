@@ -65,15 +65,15 @@ func TestMainHandlerWhenRequestIsOkAndBodyIsNotEmpty(t *testing.T) {
 // Город, передаваемый, в параметре city, не поддерживается.
 // Сервис возвращает код ответа 400 и ошибку "wrong city value" в теле ответа.
 func TestMainHandlerWhenCityIsNotOk(t *testing.T) {
-	wrongCity := "irkutsk"
+	wrongCity := "UnExistsCity"
 	req := httptest.NewRequest("GET", "/cafe?count=2&city="+wrongCity, http.NoBody)
 
 	responseRecorder := httptest.NewRecorder()
 	handler := http.HandlerFunc(mainHandle)
 	handler.ServeHTTP(responseRecorder, req)
 
-	city := req.URL.Query().Get("city")
-	assert.NotEqual(t, "moscow", city)
+	// city := req.URL.Query().Get("city")
+	// assert.NotEqual(t, "moscow", city)
 
 	actualStatus := responseRecorder.Code
 	assert.Equal(t, 400, actualStatus)
@@ -94,9 +94,9 @@ func TestMainHandlerWhenCountMoreThanTotal(t *testing.T) {
 	allCafes := strings.Join(cafeList[city], ",")
 	assert.Equal(t, allCafes, responseRecorder.Body.String())
 
-	totalCount := 4
-	count := req.URL.Query().Get("count")
-	actualCount, _ := strconv.Atoi(count)
-	assert.Greater(t, actualCount, totalCount)
+	totalCount := len(cafeList[city])
+	cafesFromResponse := strings.Split(responseRecorder.Body.String(), ",")
+	actualCount := len(cafesFromResponse)
+	assert.Equal(t, totalCount, actualCount)
 
 }
